@@ -203,17 +203,20 @@
     <div class="container">
         <h1>API Key 有效性批量检测</h1>
         
-        <div class="settings-group">
-            <h2>自定义设置 (支持OpenAI标准接口)</h2>
-            <div class="input-row">
-                <label for="apiBaseUrl">API 地址:</label>
-                <input type="text" id="apiBaseUrl" value="https://api.openai.com/v1">
-            </div>
-            <div class="input-row">
-                <label for="testModel">测试模型:</label>
-                <input type="text" id="testModel" value="gpt-3.5-turbo">
-            </div>
+    <div class="settings-group">
+        <h2>自定义设置 (支持OpenAI标准接口)</h2>
+        <div class="input-row">
+            <label for="apiBaseUrl">API 地址:</label>
+            <select id="apiBaseUrl">
+                <option value="https://api.openai.com/v1">OpenAI</option>
+                <option value="https://generativelanguage.googleapis.com/v1beta/openai/">Google (Gemini)</option>
+                </select>
         </div>
+        <div class="input-row">
+            <label for="testModel">测试模型:</label>
+            <input type="text" id="testModel" value="gpt-3.5-turbo">
+        </div>
+    </div>
 
         <textarea id="tokens" placeholder="请输入 API Key，支持每行一个或用逗号/空格分隔"></textarea>
         <button id="checkButton" onclick="checkTokens()">开始检测</button>
