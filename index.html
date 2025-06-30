@@ -1,96 +1,399 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script defer src="/_vercel/insights/script.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@exampledev/new.css@1.1.2/new.min.css"
-    />
-    <title>Vercel HTML Starter</title>
-    <meta
-      name="description"
-      content="High-performance HTML based website template."
-    />
-  </head>
-  <body>
-    <h1>Vercel HTML Starter</h1>
-    <p>
-      This template is a simple, but powerful single
-      <code>index.html</code> file deployed to
-      <a href="https://vercel.com">Vercel</a>. When your site is deployed, all
-      static assets (like HTML, JavaScript, CSS, images, and more) are deployed
-      globally to every
-      <a href="https://vercel.com/docs/concepts/edge-network/overview"
-        >Vercel Edge Network</a
-      >
-      region.
-    </p>
-    <h2>Simple, privacy-friendly analytics</h2>
-    <p>
-      Want to understand your visitor traffic? Vercel Analytics gives you
-      first-party, privacy-friendly traffic analytics for your HTML site. This
-      template is already configured using the following script:
-    </p>
-    <pre><code>&lt;script defer src="/_vercel/insights/script.js"&gt;&lt;/script&gt;</code></pre>
-    <p>
-      Learn more about
-      <a href="https://vercel.com/analytics">Vercel Analytics</a>.
-    </p>
-    <h2>Integrated with git</h2>
-    <p>
-      Deploying updates to your site is as simple as
-      <code>git push</code> thanks to Vercel's advanced
-      <a href="https://vercel.com/docs/concepts/git">Git Integration</a>.
-      Support for GitHub, GitLab, Bitbucket is zero-configuration, and with the
-      flexible Vercel CLI and API, you can integrate with any tool possible.
-    </p>
-    <p>
-      Learn more about
-      <a href="https://vercel.com/docs/concepts/git">Git Integration</a>.
-    </p>
-    <h2>Fast <code>gzip</code> compression</h2>
-    <p>
-      To help ensure the smallest possible file sizes for your static assets,
-      the Vercel Edge Network compresses files by default using
-      <code>gzip</code>. You can also optionally use
-      <code>brotli</code> compressesion if you prefer.
-    </p>
-    <p>
-      Learn more about
-      <a href="https://vercel.com/docs/concepts/edge-network/compression"
-        >compression</a
-      >.
-    </p>
-    <h2>Advanced routing configuration</h2>
-    <p>
-      Vercel gives you a variety of ways to configure the routing of your
-      website. For example, adding redirects, rewrites, or headers to your page.
-      While you can use <code>vercel.json</code> to define these through JSON,
-      you can also express your routing configuration as code using
-      <a href="https://vercel.com/docs/concepts/functions/edge-middleware"
-        >Vercel Edge Middleware</a
-      >.
-    </p>
-    <p>
-      Middleware runs before the
-      <a href="https://vercel.com/docs/concepts/edge-network/caching"
-        >Vercel Edge Network Cache</a
-      >, so you can configure routing exactly as your application needs. For
-      example, this template uses <code>middleware.js</code> defined in the root
-      of the repository to add additional security headers to the site:
-    </p>
-    <pre><code>referrer-policy: origin-when-cross-origin
-strict-transport-security: max-age=31536000; includeSubDomains; preload
-x-content-type-options: nosniff
-x-dns-prefetch-control: on
-x-frame-options: DENY</code></pre>
-    <p>
-      Learn more about
-      <a href="https://vercel.com/docs/concepts/functions/edge-middleware"
-        >Vercel Edge Middleware</a
-      >.
-    </p>
-  </body>
+<html lang="zh-CN">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Key 有效性批量检测</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .settings-group {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .settings-group h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #34495e;
+            font-size: 18px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .input-row label {
+            font-weight: bold;
+            flex-shrink: 0;
+            width: 80px;
+        }
+
+        .input-row input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+            height: 200px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .results h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .results-content {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            min-height: 50px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        #validResults {
+            border-left: 4px solid #2ecc71;
+        }
+
+        #invalidResults {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .invalid-token {
+            display: flex;
+            background-color: #ffecec;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .invalid-token-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .invalid-token-token {
+            font-family: monospace;
+            background-color: #fff;
+            padding: 6px;
+            border-radius: 3px;
+            margin-bottom: 6px;
+            border: 1px solid #ffcccb;
+            word-break: break-all;
+        }
+
+        .invalid-token-message {
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .copy-button {
+            background-color: #27ae60;
+            margin-top: 10px;
+        }
+
+        .copy-button:hover {
+            background-color: #2ecc71;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .button-group .copy-button {
+            flex: 1;
+            margin-top: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>API Key 有效性批量检测</h1>
+        
+        <div class="settings-group">
+            <h2>自定义设置 (支持OpenAI标准接口)</h2>
+            <div class="input-row">
+                <label for="apiBaseUrl">API 地址:</label>
+                <input type="text" id="apiBaseUrl" value="https://api.openai.com/v1">
+            </div>
+            <div class="input-row">
+                <label for="testModel">测试模型:</label>
+                <input type="text" id="testModel" value="gpt-3.5-turbo">
+            </div>
+        </div>
+
+        <textarea id="tokens" placeholder="请输入 API Key，支持每行一个或用逗号/空格分隔"></textarea>
+        <button id="checkButton" onclick="checkTokens()">开始检测</button>
+        
+        <div class="results">
+            <h2>有效账号</h2>
+            <div id="validResults" class="results-content"></div>
+            <div class="button-group">
+                <button id="copyValidButton" class="copy-button" onclick="copyTokens('valid')" style="display: none;">复制有效Key(换行)</button>
+                <button id="copyValidCommaButton" class="copy-button" onclick="copyTokensWithComma('valid')" style="display: none;">复制有效Key(逗号)</button>
+            </div>
+
+            <h2 style="margin-top: 20px;">失效账号</h2>
+            <div id="invalidResults" class="results-content"></div>
+
+            <h2 style="margin-top: 20px;">重复账号</h2>
+            <div id="duplicateResults" class="results-content" style="border-left: 4px solid #9b59b6;"></div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载时恢复保存的设置
+        document.addEventListener('DOMContentLoaded', function() {
+            // 从localStorage恢复API地址和测试模型
+            const savedApiBaseUrl = localStorage.getItem('apiBaseUrl');
+            const savedTestModel = localStorage.getItem('testModel');
+            
+            if (savedApiBaseUrl) {
+                document.getElementById('apiBaseUrl').value = savedApiBaseUrl;
+            }
+            
+            if (savedTestModel) {
+                document.getElementById('testModel').value = savedTestModel;
+            }
+        });
+
+        async function checkTokens() {
+            const tokensTextarea = document.getElementById('tokens');
+            const checkButton = document.getElementById('checkButton');
+            const validResults = document.getElementById('validResults');
+            const invalidResults = document.getElementById('invalidResults');
+            const duplicateResults = document.getElementById('duplicateResults');
+            const copyValidButton = document.getElementById('copyValidButton');
+            const copyValidCommaButton = document.getElementById('copyValidCommaButton');
+            
+            const apiBaseUrl = document.getElementById('apiBaseUrl').value.trim();
+            const testModel = document.getElementById('testModel').value.trim();
+
+            // 保存设置到localStorage
+            localStorage.setItem('apiBaseUrl', apiBaseUrl);
+            localStorage.setItem('testModel', testModel);
+
+            if (!apiBaseUrl || !testModel) {
+                alert('请填写有效的 API 地址和测试模型');
+                return;
+            }
+
+            const inputText = tokensTextarea.value.trim();
+            // 使用正则表达式替换换行、逗号和多个空格为单个空格，然后按空格分割
+            const rawTokens = inputText.replace(/[\n,]+/g, ' ').split(' ');
+            let allTokens = rawTokens.map(t => t.trim()).filter(t => t !== '');
+
+            let tokenCount = new Map();
+            let duplicateTokens = new Set();
+            
+            allTokens.forEach(token => {
+                tokenCount.set(token, (tokenCount.get(token) || 0) + 1);
+                if (tokenCount.get(token) > 1) {
+                    duplicateTokens.add(token);
+                }
+            });
+
+            const uniqueTokens = [...new Set(allTokens)];
+
+            if (uniqueTokens.length === 0) {
+                alert('请输入至少一个 API Key');
+                return;
+            }
+            
+            duplicateResults.textContent = duplicateTokens.size > 0 
+                ? `发现 ${duplicateTokens.size} 个重复Key:\n${[...duplicateTokens].join('\n')}\n(检测时已自动去重)` 
+                : '没有发现重复的Key';
+
+            checkButton.disabled = true;
+            checkButton.innerHTML = '<span class="loader"></span>检测中...';
+            validResults.textContent = '';
+            invalidResults.innerHTML = '';
+            copyValidButton.style.display = 'none';
+            copyValidCommaButton.style.display = 'none';
+
+            const results = await Promise.all(uniqueTokens.map(token => checkToken(token, apiBaseUrl, testModel)));
+
+            const validTokens = [];
+            const invalidTokens = [];
+
+            results.forEach(result => {
+                if (result.isValid) {
+                    validTokens.push(result.token);
+                } else {
+                    invalidTokens.push(result);
+                }
+            });
+
+            validResults.textContent = validTokens.join('\n');
+
+            invalidTokens.forEach(result => {
+                const div = document.createElement('div');
+                div.className = 'invalid-token';
+                div.innerHTML = `
+                    <div class="invalid-token-content">
+                        <div class="invalid-token-token">${result.token}</div>
+                        <div class="invalid-token-message">错误: ${result.message}</div>
+                    </div>
+                `;
+                invalidResults.appendChild(div);
+            });
+
+            if (validTokens.length > 0) {
+                copyValidButton.style.display = 'block';
+                copyValidCommaButton.style.display = 'block';
+            }
+
+            checkButton.disabled = false;
+            checkButton.textContent = '开始检测';
+        }
+
+        async function checkToken(token, apiBaseUrl, testModel) {
+            const fullUrl = `${apiBaseUrl.replace(/\/$/, '')}/chat/completions`;
+            try {
+                const response = await fetch(fullUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        "model": testModel,
+                        "messages": [{ "role": "user", "content": "hi" }],
+                        "max_tokens": 1,
+                        "stream": false
+                    })
+                });
+
+                if (response.ok) {
+                    return { token, isValid: true };
+                } else {
+                    const errorData = await response.json();
+                    const errorMessage = errorData.error ? errorData.error.message : (errorData.message || `HTTP ${response.status} - ${response.statusText}`);
+                    return { token, isValid: false, message: errorMessage };
+                }
+            } catch (error) {
+                return { token, isValid: false, message: `请求失败: ${error.message}` };
+            }
+        }
+
+        function copyTokens(type) {
+            const resultsDiv = document.getElementById('validResults');
+            const textToCopy = resultsDiv.textContent.trim();
+            if (!textToCopy) return;
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert('有效Key已复制到剪贴板 (换行分隔)');
+            }, (err) => {
+                alert('复制失败: ', err);
+            });
+        }
+
+        function copyTokensWithComma(type) {
+            const resultsDiv = document.getElementById('validResults');
+            const tokens = resultsDiv.textContent.trim().split('\n');
+            const textToCopy = tokens.join(',');
+             if (!textToCopy) return;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert('有效Key已复制到剪贴板 (逗号分隔)');
+            }, (err) => {
+                alert('复制失败: ', err);
+            });
+        }
+    </script>
+</body>
+
 </html>
