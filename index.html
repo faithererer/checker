@@ -56,15 +56,16 @@
         .input-row label {
             font-weight: bold;
             flex-shrink: 0;
-            width: 80px;
+            width: 90px; /* 适当加宽以适应 "API 提供商" */
         }
 
-        .input-row input {
+        .input-row input, .input-row select { /* 应用于 select */
             flex-grow: 1;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
+            background-color: #fff; /* 确保 select 背景色 */
         }
         
         textarea {
@@ -205,20 +206,27 @@
         
     <div class="settings-group">
         <h2>自定义设置 (支持OpenAI标准接口)</h2>
+
+        <div class="input-row">
+            <label for="apiProviderSelector">API 提供商:</label>
+            <select id="apiProviderSelector">
+                <option value="https://api.openai.com/v1" selected>OpenAI (默认)</option>
+                <option value="https://generativelanguage.googleapis.com/v1beta/openai/">Google (Gemini)</option>
+                <option value="custom">自定义</option>
+            </select>
+        </div>
+        
         <div class="input-row">
             <label for="apiBaseUrl">API 地址:</label>
-            <select id="apiBaseUrl">
-                <option value="https://api.openai.com/v1">OpenAI</option>
-                <option value="https://generativelanguage.googleapis.com/v1beta/openai/">Google (Gemini)</option>
-                </select>
+            <input type="text" id="apiBaseUrl" value="https://api.openai.com/v1">
         </div>
+
         <div class="input-row">
             <label for="testModel">测试模型:</label>
             <input type="text" id="testModel" value="gpt-3.5-turbo">
         </div>
     </div>
-
-        <textarea id="tokens" placeholder="请输入 API Key，支持每行一个或用逗号/空格分隔"></textarea>
+    <textarea id="tokens" placeholder="请输入 API Key，支持每行一个或用逗号/空格分隔"></textarea>
         <button id="checkButton" onclick="checkTokens()">开始检测</button>
         
         <div class="results">
@@ -238,164 +246,193 @@
     </div>
 
     <script>
-        // 页面加载时恢复保存的设置
-        document.addEventListener('DOMContentLoaded', function() {
-            // 从localStorage恢复API地址和测试模型
-            const savedApiBaseUrl = localStorage.getItem('apiBaseUrl');
-            const savedTestModel = localStorage.getItem('testModel');
-            
-            if (savedApiBaseUrl) {
-                document.getElementById('apiBaseUrl').value = savedApiBaseUrl;
+    // ========== JavaScript 修改部分开始 ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        // 获取所有需要的元素
+        const providerSelector = document.getElementById('apiProviderSelector');
+        const apiBaseUrlInput = document.getElementById('apiBaseUrl');
+        const testModelInput = document.getElementById('testModel');
+
+        // --- 1. 从 localStorage 恢复设置并同步 UI ---
+        const savedApiBaseUrl = localStorage.getItem('apiBaseUrl') || 'https://api.openai.com/v1';
+        const savedTestModel = localStorage.getItem('testModel') || 'gpt-3.5-turbo';
+
+        apiBaseUrlInput.value = savedApiBaseUrl;
+        testModelInput.value = savedTestModel;
+        
+        // 检查保存的 URL 是否是预设选项
+        const matchingOption = Array.from(providerSelector.options).find(opt => opt.value === savedApiBaseUrl);
+
+        if (matchingOption) {
+            // 如果是预设选项，则选中该选项并使输入框只读
+            providerSelector.value = matchingOption.value;
+            apiBaseUrlInput.readOnly = true;
+        } else {
+            // 如果是自定义 URL，则选中“自定义”并使输入框可编辑
+            providerSelector.value = 'custom';
+            apiBaseUrlInput.readOnly = false;
+        }
+
+        // --- 2. 添加事件监听器以处理用户交互 ---
+        providerSelector.addEventListener('change', function() {
+            const selectedValue = this.value;
+            if (selectedValue === 'custom') {
+                // 当用户选择 "自定义"
+                apiBaseUrlInput.value = ''; // 清空输入框
+                apiBaseUrlInput.readOnly = false; // 设为可编辑
+                apiBaseUrlInput.focus(); // 聚焦，方便用户输入
+            } else {
+                // 当用户选择预设选项
+                apiBaseUrlInput.value = selectedValue; // 填充 URL
+                apiBaseUrlInput.readOnly = true; // 设为只读
             }
-            
-            if (savedTestModel) {
-                document.getElementById('testModel').value = savedTestModel;
+        });
+    });
+    // ========== JavaScript 修改部分结束 ==========
+
+    async function checkTokens() {
+        const tokensTextarea = document.getElementById('tokens');
+        const checkButton = document.getElementById('checkButton');
+        const validResults = document.getElementById('validResults');
+        const invalidResults = document.getElementById('invalidResults');
+        const duplicateResults = document.getElementById('duplicateResults');
+        const copyValidButton = document.getElementById('copyValidButton');
+        const copyValidCommaButton = document.getElementById('copyValidCommaButton');
+        
+        // 从输入框读取最终的 API 地址和模型
+        const apiBaseUrl = document.getElementById('apiBaseUrl').value.trim();
+        const testModel = document.getElementById('testModel').value.trim();
+
+        // 保存当前有效的设置到 localStorage
+        localStorage.setItem('apiBaseUrl', apiBaseUrl);
+        localStorage.setItem('testModel', testModel);
+
+        if (!apiBaseUrl || !testModel) {
+            alert('请填写有效的 API 地址和测试模型');
+            return;
+        }
+
+        const inputText = tokensTextarea.value.trim();
+        const rawTokens = inputText.replace(/[\n,]+/g, ' ').split(' ');
+        let allTokens = rawTokens.map(t => t.trim()).filter(t => t !== '');
+
+        let tokenCount = new Map();
+        let duplicateTokens = new Set();
+        
+        allTokens.forEach(token => {
+            tokenCount.set(token, (tokenCount.get(token) || 0) + 1);
+            if (tokenCount.get(token) > 1) {
+                duplicateTokens.add(token);
             }
         });
 
-        async function checkTokens() {
-            const tokensTextarea = document.getElementById('tokens');
-            const checkButton = document.getElementById('checkButton');
-            const validResults = document.getElementById('validResults');
-            const invalidResults = document.getElementById('invalidResults');
-            const duplicateResults = document.getElementById('duplicateResults');
-            const copyValidButton = document.getElementById('copyValidButton');
-            const copyValidCommaButton = document.getElementById('copyValidCommaButton');
-            
-            const apiBaseUrl = document.getElementById('apiBaseUrl').value.trim();
-            const testModel = document.getElementById('testModel').value.trim();
+        const uniqueTokens = [...new Set(allTokens)];
 
-            // 保存设置到localStorage
-            localStorage.setItem('apiBaseUrl', apiBaseUrl);
-            localStorage.setItem('testModel', testModel);
+        if (uniqueTokens.length === 0) {
+            alert('请输入至少一个 API Key');
+            return;
+        }
+        
+        duplicateResults.textContent = duplicateTokens.size > 0 
+            ? `发现 ${duplicateTokens.size} 个重复Key:\n${[...duplicateTokens].join('\n')}\n(检测时已自动去重)` 
+            : '没有发现重复的Key';
 
-            if (!apiBaseUrl || !testModel) {
-                alert('请填写有效的 API 地址和测试模型');
-                return;
+        checkButton.disabled = true;
+        checkButton.innerHTML = '<span class="loader"></span>检测中...';
+        validResults.textContent = '';
+        invalidResults.innerHTML = '';
+        copyValidButton.style.display = 'none';
+        copyValidCommaButton.style.display = 'none';
+
+        const results = await Promise.all(uniqueTokens.map(token => checkToken(token, apiBaseUrl, testModel)));
+
+        const validTokens = [];
+        const invalidTokens = [];
+
+        results.forEach(result => {
+            if (result.isValid) {
+                validTokens.push(result.token);
+            } else {
+                invalidTokens.push(result);
             }
+        });
 
-            const inputText = tokensTextarea.value.trim();
-            // 使用正则表达式替换换行、逗号和多个空格为单个空格，然后按空格分割
-            const rawTokens = inputText.replace(/[\n,]+/g, ' ').split(' ');
-            let allTokens = rawTokens.map(t => t.trim()).filter(t => t !== '');
+        validResults.textContent = validTokens.join('\n');
 
-            let tokenCount = new Map();
-            let duplicateTokens = new Set();
-            
-            allTokens.forEach(token => {
-                tokenCount.set(token, (tokenCount.get(token) || 0) + 1);
-                if (tokenCount.get(token) > 1) {
-                    duplicateTokens.add(token);
-                }
-            });
+        invalidTokens.forEach(result => {
+            const div = document.createElement('div');
+            div.className = 'invalid-token';
+            div.innerHTML = `
+                <div class="invalid-token-content">
+                    <div class="invalid-token-token">${result.token}</div>
+                    <div class="invalid-token-message">错误: ${result.message}</div>
+                </div>
+            `;
+            invalidResults.appendChild(div);
+        });
 
-            const uniqueTokens = [...new Set(allTokens)];
-
-            if (uniqueTokens.length === 0) {
-                alert('请输入至少一个 API Key');
-                return;
-            }
-            
-            duplicateResults.textContent = duplicateTokens.size > 0 
-                ? `发现 ${duplicateTokens.size} 个重复Key:\n${[...duplicateTokens].join('\n')}\n(检测时已自动去重)` 
-                : '没有发现重复的Key';
-
-            checkButton.disabled = true;
-            checkButton.innerHTML = '<span class="loader"></span>检测中...';
-            validResults.textContent = '';
-            invalidResults.innerHTML = '';
-            copyValidButton.style.display = 'none';
-            copyValidCommaButton.style.display = 'none';
-
-            const results = await Promise.all(uniqueTokens.map(token => checkToken(token, apiBaseUrl, testModel)));
-
-            const validTokens = [];
-            const invalidTokens = [];
-
-            results.forEach(result => {
-                if (result.isValid) {
-                    validTokens.push(result.token);
-                } else {
-                    invalidTokens.push(result);
-                }
-            });
-
-            validResults.textContent = validTokens.join('\n');
-
-            invalidTokens.forEach(result => {
-                const div = document.createElement('div');
-                div.className = 'invalid-token';
-                div.innerHTML = `
-                    <div class="invalid-token-content">
-                        <div class="invalid-token-token">${result.token}</div>
-                        <div class="invalid-token-message">错误: ${result.message}</div>
-                    </div>
-                `;
-                invalidResults.appendChild(div);
-            });
-
-            if (validTokens.length > 0) {
-                copyValidButton.style.display = 'block';
-                copyValidCommaButton.style.display = 'block';
-            }
-
-            checkButton.disabled = false;
-            checkButton.textContent = '开始检测';
+        if (validTokens.length > 0) {
+            copyValidButton.style.display = 'block';
+            copyValidCommaButton.style.display = 'block';
         }
 
-        async function checkToken(token, apiBaseUrl, testModel) {
-            const fullUrl = `${apiBaseUrl.replace(/\/$/, '')}/chat/completions`;
-            try {
-                const response = await fetch(fullUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        "model": testModel,
-                        "messages": [{ "role": "user", "content": "hi" }],
-                        "max_tokens": 1,
-                        "stream": false
-                    })
-                });
+        checkButton.disabled = false;
+        checkButton.textContent = '开始检测';
+    }
 
-                if (response.ok) {
-                    return { token, isValid: true };
-                } else {
-                    const errorData = await response.json();
-                    const errorMessage = errorData.error ? errorData.error.message : (errorData.message || `HTTP ${response.status} - ${response.statusText}`);
-                    return { token, isValid: false, message: errorMessage };
-                }
-            } catch (error) {
-                return { token, isValid: false, message: `请求失败: ${error.message}` };
+    async function checkToken(token, apiBaseUrl, testModel) {
+        const fullUrl = `${apiBaseUrl.replace(/\/$/, '')}/chat/completions`;
+        try {
+            const response = await fetch(fullUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "model": testModel,
+                    "messages": [{ "role": "user", "content": "hi" }],
+                    "max_tokens": 1,
+                    "stream": false
+                })
+            });
+
+            if (response.ok) {
+                return { token, isValid: true };
+            } else {
+                const errorData = await response.json();
+                const errorMessage = errorData.error ? errorData.error.message : (errorData.message || `HTTP ${response.status} - ${response.statusText}`);
+                return { token, isValid: false, message: errorMessage };
             }
+        } catch (error) {
+            return { token, isValid: false, message: `请求失败: ${error.message}` };
         }
+    }
 
-        function copyTokens(type) {
-            const resultsDiv = document.getElementById('validResults');
-            const textToCopy = resultsDiv.textContent.trim();
-            if (!textToCopy) return;
+    function copyTokens(type) {
+        const resultsDiv = document.getElementById('validResults');
+        const textToCopy = resultsDiv.textContent.trim();
+        if (!textToCopy) return;
 
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                alert('有效Key已复制到剪贴板 (换行分隔)');
-            }, (err) => {
-                alert('复制失败: ', err);
-            });
-        }
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            alert('有效Key已复制到剪贴板 (换行分隔)');
+        }, (err) => {
+            alert('复制失败: ', err);
+        });
+    }
 
-        function copyTokensWithComma(type) {
-            const resultsDiv = document.getElementById('validResults');
-            const tokens = resultsDiv.textContent.trim().split('\n');
-            const textToCopy = tokens.join(',');
-             if (!textToCopy) return;
-            
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                alert('有效Key已复制到剪贴板 (逗号分隔)');
-            }, (err) => {
-                alert('复制失败: ', err);
-            });
-        }
+    function copyTokensWithComma(type) {
+        const resultsDiv = document.getElementById('validResults');
+        const tokens = resultsDiv.textContent.trim().split('\n');
+        const textToCopy = tokens.join(',');
+         if (!textToCopy) return;
+        
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            alert('有效Key已复制到剪贴板 (逗号分隔)');
+        }, (err) => {
+            alert('复制失败: ', err);
+        });
+    }
     </script>
 </body>
 
