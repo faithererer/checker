@@ -124,13 +124,11 @@
             word-break: break-all;
         }
 
-        #validResults {
-            border-left: 4px solid #2ecc71;
-        }
-
-        #invalidResults {
-            border-left: 4px solid #e74c3c;
-        }
+        .category-valid { border-left: 4px solid #2ecc71; } /* 绿色 */
+        .category-quota { border-left: 4px solid #f39c12; } /* 橙色 */
+        .category-suspended { border-left: 4px solid #e74c3c; } /* 红色 */
+        .category-invalid { border-left: 4px solid #8e44ad; } /* 紫色 */
+        .category-unknown { border-left: 4px solid #95a5a6; } /* 灰色 */
 
         .invalid-token {
             display: flex;
@@ -179,18 +177,23 @@
         }
 
         .copy-button {
-            background-color: #27ae60;
-            margin-top: 10px;
+            background-color: #7f8c8d; /* 中性灰色 */
+            padding: 6px 12px; /* 减小内边距 */
+            font-size: 13px;   /* 减小字号 */
+            flex-grow: 0;      /* 不拉伸 */
+            width: auto;       /* 自动宽度 */
+            margin-top: 0;
         }
 
         .copy-button:hover {
-            background-color: #2ecc71;
+            background-color: #95a5a6;
         }
 
         .button-group {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 8px;
+            margin-top: 8px; /* 减小上边距 */
+            justify-content: flex-end; /* 按钮靠右对齐 */
         }
 
         .button-group .copy-button {
@@ -230,18 +233,43 @@
         <button id="checkButton" onclick="checkTokens()">开始检测</button>
         
         <div class="results">
-            <h2>有效账号</h2>
-            <div id="validResults" class="results-content"></div>
+            <h2>✅ 有效 Keys</h2>
+            <div id="valid-keys" class="results-content category-valid"></div>
             <div class="button-group">
-                <button id="copyValidButton" class="copy-button" onclick="copyTokens('valid')" style="display: none;">复制有效Key(换行)</button>
-                <button id="copyValidCommaButton" class="copy-button" onclick="copyTokensWithComma('valid')" style="display: none;">复制有效Key(逗号)</button>
+                <button id="copy-VALID-newline" class="copy-button" onclick="copyCategoryTokens('VALID', 'newline')" style="display: none;">📋 换行</button>
+                <button id="copy-VALID-comma" class="copy-button" onclick="copyCategoryTokens('VALID', 'comma')" style="display: none;">📋 逗号</button>
             </div>
 
-            <h2 style="margin-top: 20px;">失效账号</h2>
-            <div id="invalidResults" class="results-content"></div>
+            <h2 style="margin-top: 20px;">😅额度用尽</h2>
+            <div id="quota-exceeded-keys" class="results-content category-quota"></div>
+            <div class="button-group">
+                <button id="copy-QUOTA_EXCEEDED-newline" class="copy-button" onclick="copyCategoryTokens('QUOTA_EXCEEDED', 'newline')" style="display: none;">📋 换行</button>
+                <button id="copy-QUOTA_EXCEEDED-comma" class="copy-button" onclick="copyCategoryTokens('QUOTA_EXCEEDED', 'comma')" style="display: none;">📋 逗号</button>
+            </div>
+            
+            <h2 style="margin-top: 20px;">🚫 已被禁用</h2>
+            <div id="suspended-keys" class="results-content category-suspended"></div>
+            <div class="button-group">
+                <button id="copy-KEY_SUSPENDED-newline" class="copy-button" onclick="copyCategoryTokens('KEY_SUSPENDED', 'newline')" style="display: none;">📋 换行</button>
+                <button id="copy-KEY_SUSPENDED-comma" class="copy-button" onclick="copyCategoryTokens('KEY_SUSPENDED', 'comma')" style="display: none;">📋 逗号</button>
+            </div>
 
-            <h2 style="margin-top: 20px;">重复账号</h2>
-            <div id="duplicateResults" class="results-content" style="border-left: 4px solid #9b59b6;"></div>
+            <h2 style="margin-top: 20px;">❌ 无效/格式错误</h2>
+            <div id="invalid-keys" class="results-content category-invalid"></div>
+             <div class="button-group">
+                <button id="copy-INVALID_KEY-newline" class="copy-button" onclick="copyCategoryTokens('INVALID_KEY', 'newline')" style="display: none;">📋 换行</button>
+                <button id="copy-INVALID_KEY-comma" class="copy-button" onclick="copyCategoryTokens('INVALID_KEY', 'comma')" style="display: none;">📋 逗号</button>
+            </div>
+
+            <h2 style="margin-top: 20px;">❓ 其他错误</h2>
+            <div id="unknown-error-keys" class="results-content category-unknown"></div>
+             <div class="button-group">
+                <button id="copy-UNKNOWN_ERROR-newline" class="copy-button" onclick="copyCategoryTokens('UNKNOWN_ERROR', 'newline')" style="display: none;">📋 换行</button>
+                <button id="copy-UNKNOWN_ERROR-comma" class="copy-button" onclick="copyCategoryTokens('UNKNOWN_ERROR', 'comma')" style="display: none;">📋 逗号</button>
+            </div>
+
+            <h2 style="margin-top: 20px;">🔄 重复账号</h2>
+            <div id="duplicateResults" class="results-content" style="border-left: 4px solid #bdc3c7;"></div>
         </div>
     </div>
 
@@ -293,11 +321,7 @@
     async function checkTokens() {
         const tokensTextarea = document.getElementById('tokens');
         const checkButton = document.getElementById('checkButton');
-        const validResults = document.getElementById('validResults');
-        const invalidResults = document.getElementById('invalidResults');
         const duplicateResults = document.getElementById('duplicateResults');
-        const copyValidButton = document.getElementById('copyValidButton');
-        const copyValidCommaButton = document.getElementById('copyValidCommaButton');
         
         // 从输入框读取最终的 API 地址和模型
         const apiBaseUrl = document.getElementById('apiBaseUrl').value.trim();
@@ -339,41 +363,68 @@
 
         checkButton.disabled = true;
         checkButton.innerHTML = '<span class="loader"></span>检测中...';
-        validResults.textContent = '';
-        invalidResults.innerHTML = '';
-        copyValidButton.style.display = 'none';
-        copyValidCommaButton.style.display = 'none';
 
         const results = await Promise.all(uniqueTokens.map(token => checkToken(token, apiBaseUrl, testModel)));
 
-        const validTokens = [];
-        const invalidTokens = [];
+        const categorizedResults = {
+            VALID: [],
+            QUOTA_EXCEEDED: [],
+            KEY_SUSPENDED: [],
+            INVALID_KEY: [],
+            UNKNOWN_ERROR: []
+        };
 
         results.forEach(result => {
-            if (result.isValid) {
-                validTokens.push(result.token);
+            if (categorizedResults[result.category]) {
+                categorizedResults[result.category].push(result);
             } else {
-                invalidTokens.push(result);
+                categorizedResults.UNKNOWN_ERROR.push(result);
             }
         });
 
-        validResults.textContent = validTokens.join('\n');
+        // 获取所有结果容器
+        const resultContainers = {
+            VALID: document.getElementById('valid-keys'),
+            QUOTA_EXCEEDED: document.getElementById('quota-exceeded-keys'),
+            KEY_SUSPENDED: document.getElementById('suspended-keys'),
+            INVALID_KEY: document.getElementById('invalid-keys'),
+            UNKNOWN_ERROR: document.getElementById('unknown-error-keys')
+        };
 
-        invalidTokens.forEach(result => {
-            const div = document.createElement('div');
-            div.className = 'invalid-token';
-            div.innerHTML = `
-                <div class="invalid-token-content">
-                    <div class="invalid-token-token">${result.token}</div>
-                    <div class="invalid-token-message">错误: ${result.message}</div>
-                </div>
-            `;
-            invalidResults.appendChild(div);
+        // 清空所有容器
+        for (const key in resultContainers) {
+            resultContainers[key].innerHTML = '';
+        }
+
+        // 填充有效 Keys
+        resultContainers.VALID.textContent = categorizedResults.VALID.map(r => r.token).join('\n');
+
+        // 填充其他分类的结果
+        ['QUOTA_EXCEEDED', 'KEY_SUSPENDED', 'INVALID_KEY', 'UNKNOWN_ERROR'].forEach(category => {
+            const container = resultContainers[category];
+            const results = categorizedResults[category];
+            if (results.length > 0) {
+                results.forEach(result => {
+                    const div = document.createElement('div');
+                    div.className = 'invalid-token'; // 复用现有样式
+                    div.innerHTML = `
+                        <div class="invalid-token-content">
+                            <div class="invalid-token-token">${result.token}</div>
+                            <div class="invalid-token-message">原因: ${result.message}</div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
         });
 
-        if (validTokens.length > 0) {
-            copyValidButton.style.display = 'block';
-            copyValidCommaButton.style.display = 'block';
+        // 控制所有复制按钮的可见性
+        for (const category in categorizedResults) {
+            const hasResults = categorizedResults[category].length > 0;
+            const newlineButton = document.getElementById(`copy-${category}-newline`);
+            const commaButton = document.getElementById(`copy-${category}-comma`);
+            if (newlineButton) newlineButton.style.display = hasResults ? 'block' : 'none';
+            if (commaButton) commaButton.style.display = hasResults ? 'block' : 'none';
         }
 
         checkButton.disabled = false;
@@ -397,38 +448,57 @@
                 })
             });
 
+            const responseData = await response.json().catch(() => null);
+
             if (response.ok) {
-                return { token, isValid: true };
-            } else {
-                const errorData = await response.json();
-                const errorMessage = errorData.error ? errorData.error.message : (errorData.message || `HTTP ${response.status} - ${response.statusText}`);
-                return { token, isValid: false, message: errorMessage };
+                return { token, category: 'VALID' };
             }
+
+            // 修正：处理API错误响应可能是数组的情况
+            const errorData = responseData && Array.isArray(responseData) ? responseData[0] : responseData;
+            const error = errorData ? errorData.error : null;
+            const errorMessage = error ? error.message : `HTTP ${response.status} - ${response.statusText}`;
+
+            if (response.status === 429 && error && error.status === 'RESOURCE_EXHAUSTED') {
+                return { token, category: 'QUOTA_EXCEEDED', message: errorMessage };
+            }
+            
+            if (response.status === 403 && error && error.status === 'PERMISSION_DENIED') {
+                return { token, category: 'KEY_SUSPENDED', message: errorMessage };
+            }
+
+            if (response.status === 400 && error && error.status === 'INVALID_ARGUMENT') {
+                return { token, category: 'INVALID_KEY', message: errorMessage };
+            }
+
+            return { token, category: 'UNKNOWN_ERROR', message: errorMessage };
+
         } catch (error) {
-            return { token, isValid: false, message: `请求失败: ${error.message}` };
+            return { token, category: 'UNKNOWN_ERROR', message: `请求失败: ${error.message}` };
         }
     }
 
-    function copyTokens(type) {
-        const resultsDiv = document.getElementById('validResults');
-        const textToCopy = resultsDiv.textContent.trim();
-        if (!textToCopy) return;
-
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            alert('有效Key已复制到剪贴板 (换行分隔)');
-        }, (err) => {
-            alert('复制失败: ', err);
-        });
-    }
-
-    function copyTokensWithComma(type) {
-        const resultsDiv = document.getElementById('validResults');
-        const tokens = resultsDiv.textContent.trim().split('\n');
-        const textToCopy = tokens.join(',');
-         if (!textToCopy) return;
+    function copyCategoryTokens(category, format) {
+        let container;
+        let tokens = [];
         
+        if (category === 'VALID') {
+            container = document.getElementById('valid-keys');
+            tokens = container.textContent.trim().split('\n').filter(t => t);
+        } else {
+            const containerId = category.toLowerCase().replace(/_/g, '-') + '-keys';
+            container = document.getElementById(containerId);
+            const tokenElements = container.querySelectorAll('.invalid-token-token');
+            tokenElements.forEach(el => tokens.push(el.textContent.trim()));
+        }
+
+        if (tokens.length === 0) return;
+
+        const textToCopy = format === 'comma' ? tokens.join(',') : tokens.join('\n');
+        const formatText = format === 'comma' ? '逗号' : '换行';
+
         navigator.clipboard.writeText(textToCopy).then(() => {
-            alert('有效Key已复制到剪贴板 (逗号分隔)');
+            alert(`${category} Keys 已复制到剪贴板 (${formatText}分隔)`);
         }, (err) => {
             alert('复制失败: ', err);
         });
