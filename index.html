@@ -479,28 +479,45 @@
     }
 
     function copyCategoryTokens(category, format) {
-        let container;
+        const idMap = {
+            'VALID': 'valid-keys',
+            'QUOTA_EXCEEDED': 'quota-exceeded-keys',
+            'KEY_SUSPENDED': 'suspended-keys',
+            'INVALID_KEY': 'invalid-keys',
+            'UNKNOWN_ERROR': 'unknown-error-keys'
+        };
+
+        const containerId = idMap[category];
+        if (!containerId) return;
+
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error(`Container not found for category: ${category}`);
+            return;
+        }
+
         let tokens = [];
         
         if (category === 'VALID') {
-            container = document.getElementById('valid-keys');
-            tokens = container.textContent.trim().split('\n').filter(t => t);
+            tokens = container.textContent.trim().split('\n').filter(t => t.trim() !== '');
         } else {
-            const containerId = category.toLowerCase().replace(/_/g, '-') + '-keys';
-            container = document.getElementById(containerId);
             const tokenElements = container.querySelectorAll('.invalid-token-token');
             tokenElements.forEach(el => tokens.push(el.textContent.trim()));
         }
 
-        if (tokens.length === 0) return;
+        if (tokens.length === 0) {
+            alert('没有可复制的内容。');
+            return;
+        }
 
         const textToCopy = format === 'comma' ? tokens.join(',') : tokens.join('\n');
         const formatText = format === 'comma' ? '逗号' : '换行';
 
         navigator.clipboard.writeText(textToCopy).then(() => {
-            alert(`${category} Keys 已复制到剪贴板 (${formatText}分隔)`);
+            alert(`已将 ${tokens.length} 个 ${category} Keys 复制到剪贴板 (${formatText}分隔)`);
         }, (err) => {
-            alert('复制失败: ', err);
+            console.error('复制失败:', err);
+            alert('复制失败。请检查浏览器权限或手动复制。');
         });
     }
     </script>
