@@ -6,165 +6,302 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API Key 有效性批量检测</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f0f2f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #333;
+            min-height: 100vh;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         h1 {
             color: #2c3e50;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 600;
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
         }
         
         .settings-group {
-            background-color: #f9f9f9;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 25px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .settings-group:hover {
+            border-color: #667eea;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
         }
 
         .settings-group h2 {
             margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             color: #34495e;
-            font-size: 18px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
+            font-size: 1.3em;
+            font-weight: 600;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 12px;
         }
         
         .input-row {
             display: flex;
             align-items: center;
             gap: 15px;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }
 
         .input-row label {
-            font-weight: bold;
+            font-weight: 600;
             flex-shrink: 0;
-            width: 90px; /* 适当加宽以适应 "API 提供商" */
+            width: 100px;
+            color: #495057;
         }
 
-        .input-row input, .input-row select { /* 应用于 select */
+        .input-row input, .input-row select {
             flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
             font-size: 14px;
-            background-color: #fff; /* 确保 select 背景色 */
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .input-row input:focus, .input-row select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
         textarea {
             width: 100%;
             box-sizing: border-box;
-            height: 200px;
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            height: 180px;
+            margin-bottom: 25px;
+            padding: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
             font-size: 14px;
             resize: vertical;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         button {
             display: block;
             width: 100%;
-            padding: 12px;
-            background-color: #3498db;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #fff;
             border: none;
-            border-radius: 4px;
+            border-radius: 12px;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
         }
 
         button:hover {
-            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         }
 
         button:disabled {
-            background-color: #95a5a6;
+            background: #95a5a6;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .results {
-            margin-top: 30px;
+            margin-top: 40px;
         }
 
-        .results h2 {
-            color: #2c3e50;
-            margin-bottom: 10px;
+        .result-category {
+            margin-bottom: 25px;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInCategory 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeInCategory {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-category:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .result-category h2 {
+            margin: 0;
+            padding: 16px 20px;
+            font-size: 1.1em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .result-category h2 .count-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: inherit;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .category-valid h2 { 
+            background: linear-gradient(135deg, #2ecc71, #27ae60); 
+            color: white;
+        }
+        .category-quota h2 { 
+            background: linear-gradient(135deg, #f39c12, #e67e22); 
+            color: white;
+        }
+        .category-suspended h2 { 
+            background: linear-gradient(135deg, #e74c3c, #c0392b); 
+            color: white;
+        }
+        .category-invalid h2 { 
+            background: linear-gradient(135deg, #9b59b6, #8e44ad); 
+            color: white;
+        }
+        .category-unknown h2 { 
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d); 
+            color: white;
         }
 
         .results-content {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
+            padding: 20px;
             font-size: 14px;
             min-height: 50px;
             max-height: 300px;
             overflow-y: auto;
             white-space: pre-wrap;
             word-break: break-all;
+            background: #fafafa;
         }
-
-        .category-valid { border-left: 4px solid #2ecc71; } /* 绿色 */
-        .category-quota { border-left: 4px solid #f39c12; } /* 橙色 */
-        .category-suspended { border-left: 4px solid #e74c3c; } /* 红色 */
-        .category-invalid { border-left: 4px solid #8e44ad; } /* 紫色 */
-        .category-unknown { border-left: 4px solid #95a5a6; } /* 灰色 */
 
         .invalid-token {
             display: flex;
-            background-color: #ffecec;
-            padding: 12px;
+            background: linear-gradient(135deg, #fff5f5, #ffeaea);
+            padding: 15px;
             margin-bottom: 12px;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+            transition: all 0.3s ease;
+        }
+
+        .invalid-token:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.1);
         }
 
         .invalid-token-content {
             display: flex;
             flex-direction: column;
+            width: 100%;
         }
 
         .invalid-token-token {
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
             background-color: #fff;
-            padding: 6px;
-            border-radius: 3px;
-            margin-bottom: 6px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
             border: 1px solid #ffcccb;
             word-break: break-all;
+            font-size: 13px;
         }
 
         .invalid-token-message {
             color: #c0392b;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 13px;
         }
 
         .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #fff;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             animation: spin 1s linear infinite;
             display: inline-block;
             vertical-align: middle;
@@ -177,28 +314,79 @@
         }
 
         .copy-button {
-            background-color: #7f8c8d; /* 中性灰色 */
-            padding: 6px 12px; /* 减小内边距 */
-            font-size: 13px;   /* 减小字号 */
-            flex-grow: 0;      /* 不拉伸 */
-            width: auto;       /* 自动宽度 */
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            padding: 8px 16px;
+            font-size: 13px;
+            flex-grow: 0;
+            width: auto;
             margin-top: 0;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
 
         .copy-button:hover {
-            background-color: #95a5a6;
+            background: linear-gradient(135deg, #5a6268, #495057);
+            transform: translateY(-1px);
         }
 
         .button-group {
             display: flex;
-            gap: 8px;
-            margin-top: 8px; /* 减小上边距 */
-            justify-content: flex-end; /* 按钮靠右对齐 */
+            gap: 10px;
+            margin-top: 12px;
+            justify-content: flex-end;
+            padding: 0 20px 20px;
         }
 
         .button-group .copy-button {
             flex: 1;
             margin-top: 0;
+            max-width: 120px;
+        }
+
+        /* 滚动条样式 */
+        .results-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .results-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .results-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .results-content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .input-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            
+            .input-row label {
+                width: auto;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .button-group .copy-button {
+                max-width: none;
+            }
         }
     </style>
 </head>
@@ -207,69 +395,81 @@
     <div class="container">
         <h1>API Key 有效性批量检测</h1>
         
-    <div class="settings-group">
-        <h2>自定义设置 (支持OpenAI格式标准接口)</h2>
+        <div class="settings-group">
+            <h2>自定义设置 (支持OpenAI格式标准接口)</h2>
 
-        <div class="input-row">
-            <label for="apiProviderSelector">API 提供商:</label>
-            <select id="apiProviderSelector">
-                <option value="https://api.openai.com/v1" >OpenAI </option>
-                <option value="https://generativelanguage.googleapis.com/v1beta/openai/" selected>Google (Gemini)</option>
-                <option value="custom">自定义</option>
-            </select>
-        </div>
-        
-        <div class="input-row">
-            <label for="apiBaseUrl">API 地址:</label>
-            <input type="text" id="apiBaseUrl" value="https://api.openai.com/v1">
-        </div>
+            <div class="input-row">
+                <label for="apiProviderSelector">API 提供商:</label>
+                <select id="apiProviderSelector">
+                    <option value="https://api.openai.com/v1">OpenAI</option>
+                    <option value="https://generativelanguage.googleapis.com/v1beta/openai/" selected>Google (Gemini)</option>
+                    <option value="custom">自定义</option>
+                </select>
+            </div>
+            
+            <div class="input-row">
+                <label for="apiBaseUrl">API 地址:</label>
+                <input type="text" id="apiBaseUrl" value="https://generativelanguage.googleapis.com/v1beta/openai/">
+            </div>
 
-        <div class="input-row">
-            <label for="testModel">测试模型:</label>
-            <input type="text" id="testModel" value="gpt-3.5-turbo">
+            <div class="input-row">
+                <label for="testModel">测试模型:</label>
+                <input type="text" id="testModel" value="gemini-1.5-flash">
+            </div>
         </div>
-    </div>
-    <textarea id="tokens" placeholder="请输入 API Key，支持每行一个或用逗号/空格分隔"></textarea>
+        <textarea id="tokens" placeholder="请输入 API Key，支持每行一个或用逗号/空格分隔"></textarea>
         <button id="checkButton" onclick="checkTokens()">开始检测</button>
         
         <div class="results">
-            <h2>✅ 有效 Keys</h2>
-            <div id="valid-keys" class="results-content category-valid"></div>
-            <div class="button-group">
-                <button id="copy-VALID-newline" class="copy-button" onclick="copyCategoryTokens('VALID', 'newline')" style="display: none;">📋 换行</button>
-                <button id="copy-VALID-comma" class="copy-button" onclick="copyCategoryTokens('VALID', 'comma')" style="display: none;">📋 逗号</button>
+            <div id="valid-category" class="result-category category-valid" style="display: none;">
+                <h2>✅ 有效 Keys <span id="valid-count" class="count-badge">0</span></h2>
+                <div id="valid-keys" class="results-content"></div>
+                <div class="button-group">
+                    <button id="copy-VALID-newline" class="copy-button" onclick="copyCategoryTokens('VALID', 'newline')">📋 换行</button>
+                    <button id="copy-VALID-comma" class="copy-button" onclick="copyCategoryTokens('VALID', 'comma')">📋 逗号</button>
+                </div>
             </div>
 
-            <h2 style="margin-top: 20px;">😅额度用尽</h2>
-            <div id="quota-exceeded-keys" class="results-content category-quota"></div>
-            <div class="button-group">
-                <button id="copy-QUOTA_EXCEEDED-newline" class="copy-button" onclick="copyCategoryTokens('QUOTA_EXCEEDED', 'newline')" style="display: none;">📋 换行</button>
-                <button id="copy-QUOTA_EXCEEDED-comma" class="copy-button" onclick="copyCategoryTokens('QUOTA_EXCEEDED', 'comma')" style="display: none;">📋 逗号</button>
+            <div id="quota-category" class="result-category category-quota" style="display: none;">
+                <h2>😅 额度用尽 <span id="quota-count" class="count-badge">0</span></h2>
+                <div id="quota-exceeded-keys" class="results-content"></div>
+                <div class="button-group">
+                    <button id="copy-QUOTA_EXCEEDED-newline" class="copy-button" onclick="copyCategoryTokens('QUOTA_EXCEEDED', 'newline')">📋 换行</button>
+                    <button id="copy-QUOTA_EXCEEDED-comma" class="copy-button" onclick="copyCategoryTokens('QUOTA_EXCEEDED', 'comma')">📋 逗号</button>
+                </div>
             </div>
             
-            <h2 style="margin-top: 20px;">🚫 已被禁用</h2>
-            <div id="suspended-keys" class="results-content category-suspended"></div>
-            <div class="button-group">
-                <button id="copy-KEY_SUSPENDED-newline" class="copy-button" onclick="copyCategoryTokens('KEY_SUSPENDED', 'newline')" style="display: none;">📋 换行</button>
-                <button id="copy-KEY_SUSPENDED-comma" class="copy-button" onclick="copyCategoryTokens('KEY_SUSPENDED', 'comma')" style="display: none;">📋 逗号</button>
+            <div id="suspended-category" class="result-category category-suspended" style="display: none;">
+                <h2>🚫 已被禁用 <span id="suspended-count" class="count-badge">0</span></h2>
+                <div id="suspended-keys" class="results-content"></div>
+                <div class="button-group">
+                    <button id="copy-KEY_SUSPENDED-newline" class="copy-button" onclick="copyCategoryTokens('KEY_SUSPENDED', 'newline')">📋 换行</button>
+                    <button id="copy-KEY_SUSPENDED-comma" class="copy-button" onclick="copyCategoryTokens('KEY_SUSPENDED', 'comma')">📋 逗号</button>
+                </div>
             </div>
 
-            <h2 style="margin-top: 20px;">❌ 无效/格式错误</h2>
-            <div id="invalid-keys" class="results-content category-invalid"></div>
-             <div class="button-group">
-                <button id="copy-INVALID_KEY-newline" class="copy-button" onclick="copyCategoryTokens('INVALID_KEY', 'newline')" style="display: none;">📋 换行</button>
-                <button id="copy-INVALID_KEY-comma" class="copy-button" onclick="copyCategoryTokens('INVALID_KEY', 'comma')" style="display: none;">📋 逗号</button>
+            <div id="invalid-category" class="result-category category-invalid" style="display: none;">
+                <h2>❌ 无效/格式错误 <span id="invalid-count" class="count-badge">0</span></h2>
+                <div id="invalid-keys" class="results-content"></div>
+                <div class="button-group">
+                    <button id="copy-INVALID_KEY-newline" class="copy-button" onclick="copyCategoryTokens('INVALID_KEY', 'newline')">📋 换行</button>
+                    <button id="copy-INVALID_KEY-comma" class="copy-button" onclick="copyCategoryTokens('INVALID_KEY', 'comma')">📋 逗号</button>
+                </div>
             </div>
 
-            <h2 style="margin-top: 20px;">❓ 其他错误</h2>
-            <div id="unknown-error-keys" class="results-content category-unknown"></div>
-             <div class="button-group">
-                <button id="copy-UNKNOWN_ERROR-newline" class="copy-button" onclick="copyCategoryTokens('UNKNOWN_ERROR', 'newline')" style="display: none;">📋 换行</button>
-                <button id="copy-UNKNOWN_ERROR-comma" class="copy-button" onclick="copyCategoryTokens('UNKNOWN_ERROR', 'comma')" style="display: none;">📋 逗号</button>
+            <div id="unknown-category" class="result-category category-unknown" style="display: none;">
+                <h2>❓ 其他错误 <span id="unknown-count" class="count-badge">0</span></h2>
+                <div id="unknown-error-keys" class="results-content"></div>
+                <div class="button-group">
+                    <button id="copy-UNKNOWN_ERROR-newline" class="copy-button" onclick="copyCategoryTokens('UNKNOWN_ERROR', 'newline')">📋 换行</button>
+                    <button id="copy-UNKNOWN_ERROR-comma" class="copy-button" onclick="copyCategoryTokens('UNKNOWN_ERROR', 'comma')">📋 逗号</button>
+                </div>
             </div>
 
-            <h2 style="margin-top: 20px;">🔄 重复账号</h2>
-            <div id="duplicateResults" class="results-content" style="border-left: 4px solid #bdc3c7;"></div>
+            <div id="duplicate-category" class="result-category" style="display: none; border-left: 4px solid #bdc3c7;">
+                <h2 style="background: linear-gradient(135deg, #bdc3c7, #95a5a6); color: white;">🔄 重复账号 <span id="duplicate-count" class="count-badge">0</span></h2>
+                <div id="duplicateResults" class="results-content"></div>
+            </div>
         </div>
     </div>
 
@@ -282,8 +482,8 @@
         const testModelInput = document.getElementById('testModel');
 
         // --- 1. 从 localStorage 恢复设置并同步 UI ---
-        const savedApiBaseUrl = localStorage.getItem('apiBaseUrl') || 'https://api.openai.com/v1';
-        const savedTestModel = localStorage.getItem('testModel') || 'gpt-3.5-turbo';
+        const savedApiBaseUrl = localStorage.getItem('apiBaseUrl') || 'https://generativelanguage.googleapis.com/v1beta/openai/';
+        const savedTestModel = localStorage.getItem('testModel') || 'gemini-1.5-flash';
 
         apiBaseUrlInput.value = savedApiBaseUrl;
         testModelInput.value = savedTestModel;
@@ -313,6 +513,13 @@
                 // 当用户选择预设选项
                 apiBaseUrlInput.value = selectedValue; // 填充 URL
                 apiBaseUrlInput.readOnly = true; // 设为只读
+                
+                // 根据提供商自动设置对应的默认模型
+                if (selectedValue === 'https://generativelanguage.googleapis.com/v1beta/openai/') {
+                    testModelInput.value = 'gemini-1.5-flash';
+                } else if (selectedValue === 'https://api.openai.com/v1') {
+                    testModelInput.value = 'gpt-3.5-turbo';
+                }
             }
         });
     });
@@ -322,6 +529,8 @@
         const tokensTextarea = document.getElementById('tokens');
         const checkButton = document.getElementById('checkButton');
         const duplicateResults = document.getElementById('duplicateResults');
+        const duplicateCategory = document.getElementById('duplicate-category');
+        const duplicateCount = document.getElementById('duplicate-count');
         
         // 从输入框读取最终的 API 地址和模型
         const apiBaseUrl = document.getElementById('apiBaseUrl').value.trim();
@@ -357,9 +566,21 @@
             return;
         }
         
+        // 隐藏所有结果分类
+        const categories = ['valid', 'quota', 'suspended', 'invalid', 'unknown', 'duplicate'];
+        categories.forEach(cat => {
+            const element = document.getElementById(`${cat}-category`);
+            if (element) element.style.display = 'none';
+        });
+
+        duplicateCount.textContent = duplicateTokens.size;
         duplicateResults.textContent = duplicateTokens.size > 0 
             ? `发现 ${duplicateTokens.size} 个重复Key:\n${[...duplicateTokens].join('\n')}\n(检测时已自动去重)` 
             : '没有发现重复的Key';
+
+        if (duplicateTokens.size > 0) {
+            duplicateCategory.style.display = 'block';
+        }
 
         checkButton.disabled = true;
         checkButton.innerHTML = '<span class="loader"></span>检测中...';
@@ -382,7 +603,7 @@
             }
         });
 
-        // 获取所有结果容器
+        // 获取所有结果容器和计数器
         const resultContainers = {
             VALID: document.getElementById('valid-keys'),
             QUOTA_EXCEEDED: document.getElementById('quota-exceeded-keys'),
@@ -391,40 +612,61 @@
             UNKNOWN_ERROR: document.getElementById('unknown-error-keys')
         };
 
+        const countElements = {
+            VALID: document.getElementById('valid-count'),
+            QUOTA_EXCEEDED: document.getElementById('quota-count'),
+            KEY_SUSPENDED: document.getElementById('suspended-count'),
+            INVALID_KEY: document.getElementById('invalid-count'),
+            UNKNOWN_ERROR: document.getElementById('unknown-count')
+        };
+
+        const categoryElements = {
+            VALID: document.getElementById('valid-category'),
+            QUOTA_EXCEEDED: document.getElementById('quota-category'),
+            KEY_SUSPENDED: document.getElementById('suspended-category'),
+            INVALID_KEY: document.getElementById('invalid-category'),
+            UNKNOWN_ERROR: document.getElementById('unknown-category')
+        };
+
         // 清空所有容器
         for (const key in resultContainers) {
             resultContainers[key].innerHTML = '';
         }
 
-        // 填充有效 Keys
-        resultContainers.VALID.textContent = categorizedResults.VALID.map(r => r.token).join('\n');
-
-        // 填充其他分类的结果
-        ['QUOTA_EXCEEDED', 'KEY_SUSPENDED', 'INVALID_KEY', 'UNKNOWN_ERROR'].forEach(category => {
-            const container = resultContainers[category];
+        // 填充结果并更新计数
+        let animationDelay = 0;
+        for (const category in categorizedResults) {
             const results = categorizedResults[category];
-            if (results.length > 0) {
+            const count = results.length;
+            
+            // 更新计数
+            if (countElements[category]) {
+                countElements[category].textContent = count;
+            }
+
+            // 显示有结果的分类
+            if (count > 0 && categoryElements[category]) {
+                setTimeout(() => {
+                    categoryElements[category].style.display = 'block';
+                }, animationDelay);
+                animationDelay += 100;
+            }
+
+            if (category === 'VALID') {
+                resultContainers[category].textContent = results.map(r => r.token).join('\n');
+            } else if (count > 0) {
                 results.forEach(result => {
                     const div = document.createElement('div');
-                    div.className = 'invalid-token'; // 复用现有样式
+                    div.className = 'invalid-token';
                     div.innerHTML = `
                         <div class="invalid-token-content">
                             <div class="invalid-token-token">${result.token}</div>
                             <div class="invalid-token-message">原因: ${result.message}</div>
                         </div>
                     `;
-                    container.appendChild(div);
+                    resultContainers[category].appendChild(div);
                 });
             }
-        });
-
-        // 控制所有复制按钮的可见性
-        for (const category in categorizedResults) {
-            const hasResults = categorizedResults[category].length > 0;
-            const newlineButton = document.getElementById(`copy-${category}-newline`);
-            const commaButton = document.getElementById(`copy-${category}-comma`);
-            if (newlineButton) newlineButton.style.display = hasResults ? 'block' : 'none';
-            if (commaButton) commaButton.style.display = hasResults ? 'block' : 'none';
         }
 
         checkButton.disabled = false;
@@ -514,7 +756,16 @@
         const formatText = format === 'comma' ? '逗号' : '换行';
 
         navigator.clipboard.writeText(textToCopy).then(() => {
-            alert(`已将 ${tokens.length} 个 ${category} Keys 复制到剪贴板 (${formatText}分隔)`);
+            // 添加成功反馈动画
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '✅ 已复制';
+            button.style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.background = '';
+            }, 2000);
         }, (err) => {
             console.error('复制失败:', err);
             alert('复制失败。请检查浏览器权限或手动复制。');
