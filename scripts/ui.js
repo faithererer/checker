@@ -55,7 +55,7 @@ function resetUI() {
         if (key !== 'DUPLICATE') {
             const buttonGroup = document.createElement('div');
             buttonGroup.className = 'button-group';
-            buttonGroup.innerHTML = `<button class="copy-button" onclick="copyCategoryTokens('${key}', 'newline')">📋 换行</button><button class="copy-button" onclick="copyCategoryTokens('${key}', 'comma')">📋 逗号</button>`;
+            buttonGroup.innerHTML = `<button class="copy-button" onclick="copyCategoryTokens('${key}', 'newline', event)">📋 换行</button><button class="copy-button" onclick="copyCategoryTokens('${key}', 'comma', event)">📋 逗号</button>`;
             contentItem.appendChild(buttonGroup);
         }
         contentArea.appendChild(contentItem);

@@ -1,4 +1,4 @@
-function copyCategoryTokens(category, format) {
+function copyCategoryTokens(category, format, event) {
     const categoryId = {
         'VALID': 'valid',
         'QUOTA_EXCEEDED': 'quota',
@@ -31,17 +31,15 @@ function copyCategoryTokens(category, format) {
     }
 
     const textToCopy = format === 'comma' ? tokens.join(',') : tokens.join('\n');
-    const formatText = format === 'comma' ? '逗号' : '换行';
 
     navigator.clipboard.writeText(textToCopy).then(() => {
-        // 添加成功反馈动画
         const button = event.target;
-        const originalText = button.textContent;
-        button.textContent = '✅ 已复制';
+        const originalText = button.innerHTML;
+        button.innerHTML = '✅ 已复制';
         button.style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
         
         setTimeout(() => {
-            button.textContent = originalText;
+            button.innerHTML = originalText;
             button.style.background = '';
         }, 2000);
     }, (err) => {
