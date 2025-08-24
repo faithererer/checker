@@ -45,7 +45,7 @@ checker/
 
 ## 📸 界面截图
 
-*建议在此处替换为最新的界面截图*
+ 
 
 <img width="1029" height="826" alt="image" src="https://github.com/user-attachments/assets/94181d25-5175-4467-bbde-75a91edfaafa" />
 
