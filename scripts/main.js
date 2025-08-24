@@ -32,7 +32,6 @@ async function checkToken(token, apiBaseUrl, testModel, retries) {
             body: JSON.stringify({
                 "model": testModel,
                 "messages": [{ "role": "user", "content": "hi" }],
-                "max_tokens": 1,
                 "stream": false
             })
         });
