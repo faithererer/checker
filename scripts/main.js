@@ -85,8 +85,8 @@ async function checkTokens() {
     const checkButton = document.getElementById('checkButton');
     const apiBaseUrl = document.getElementById('apiBaseUrl').value.trim();
     const testModel = document.getElementById('testModel').value.trim();
-    const concurrentRequests = parseInt(document.getElementById('concurrentRequests').value, 10) || 5;
-    const retryCount = parseInt(document.getElementById('retryCount').value, 10) || 3;
+    const concurrentRequests = parseInt(document.getElementById('concurrentRequests').value, 10) || 10;
+    const retryCount = parseInt(document.getElementById('retryCount').value, 10) || 1;
 
     localStorage.setItem('apiBaseUrl', apiBaseUrl);
     localStorage.setItem('testModel', testModel);
