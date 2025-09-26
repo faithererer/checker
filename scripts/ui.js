@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const testModelInput = document.getElementById('testModel');
     const checkButton = document.getElementById('checkButton');
     const savedApiBaseUrl = localStorage.getItem('apiBaseUrl') || 'https://generativelanguage.googleapis.com/v1beta/openai/';
-    const savedTestModel = localStorage.getItem('testModel') || 'gemini-1.5-flash';
+    const savedTestModel = localStorage.getItem('testModel') || 'gemini-2.0-flash-lite';
     apiBaseUrlInput.value = savedApiBaseUrl;
     testModelInput.value = savedTestModel;
     const matchingOption = Array.from(providerSelector.options).find(opt => opt.value === savedApiBaseUrl);
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
             apiBaseUrlInput.value = selectedValue;
             apiBaseUrlInput.readOnly = true;
             if (selectedValue === 'https://generativelanguage.googleapis.com/v1beta/openai/') {
-                testModelInput.value = 'gemini-1.5-flash';
+                testModelInput.value = 'gemini-2.0-flash-lite';
             } else if (selectedValue === 'https://api.openai.com/v1') {
                 testModelInput.value = 'gpt-3.5-turbo';
             }
