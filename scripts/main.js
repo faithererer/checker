@@ -62,7 +62,7 @@ async function checkToken(token, apiBaseUrl, testModel, retries) {
                 updateRetryStatus(); // 恢复重试状态
                 return checkToken(token, apiBaseUrl, testModel, retries - 1);
             }
-            return { token, category: 'QUOTA_EXCEEDED', message: `速率限制，重试后依然失败` };
+            return { token, category: 'QUOTA_EXCEEDED', message: errorMessage };
         }
         
         if (response.status === 403 && error && error.status === 'PERMISSION_DENIED') {
